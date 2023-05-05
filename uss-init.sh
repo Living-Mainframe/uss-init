@@ -26,6 +26,7 @@ help(){
     echo " aliases  add unicode u* aliases"
     echo " clear    add clear as an alias and as ^L"
     echo " exports  add common environment variables to ~/.profile"
+    echo " git      enhance the shell prompt to show the current git branch of git managed directories"
 
 }
 
@@ -44,6 +45,18 @@ init_bashrc(){
 	fi
 	chtag -t -c ISO8859-1 ~/.bashrc
 }
+
+add_git_branch(){
+	# add prompt-built-in branch info to ~/.bashrc
+	echo "adding prompt-built-in branch info to $HOME/.bashrc"
+	grep "^export PS1" ~/.bashrc > /dev/null ||
+		cat <<EOT >> ~/.bashrc
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+export PS1="\u@\h \[\033[32m\]\w\[\033[33m\]\$(parse_git_branch)\[\033[00m\] $ "
+EOT
+}     
 
 add_u_aliases(){
 	# add unicode aliases to ~/.bashrc
@@ -95,7 +108,8 @@ while true; do
                 "bashrc") init_bashrc;;
                 "aliases") add_u_aliases;;
                 "clear") add_clear;;
-                "exports") add_exports;;
+ 		"git") add_git_branch;;
+ 		"exports") add_exports;;
 		"") exit 0;;
 		*) echo "unknown option: $1";;
 	esac
